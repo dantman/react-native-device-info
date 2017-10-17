@@ -41,9 +41,10 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
 
     this.reactContext = reactContext;
 
-
-    WifiManager manager = (WifiManager) reactContext.getSystemService(Context.WIFI_SERVICE);
-    this.wifiInfo = manager.getConnectionInfo();
+    if (getCurrentActivity() != null && getCurrentActivity().checkCallingOrSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
+      WifiManager manager = (WifiManager) getCurrentActivity().getSystemService(Context.WIFI_SERVICE);
+      this.wifiInfo = manager.getConnectionInfo();
+    }
   }
 
   @Override
@@ -95,14 +96,22 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getIpAddress(Promise p) {
-    String ipAddress = Formatter.formatIpAddress(wifiInfo.getIpAddress());
-    p.resolve(ipAddress);
+    if (wifiInfo != null) {
+      String ipAddress = Formatter.formatIpAddress(wifiInfo.getIpAddress());
+      p.resolve(ipAddress);
+    } else {
+      p.resolve(null);
+    }
   }
 
   @ReactMethod
   public void getMacAddress(Promise p) {
-    String macAddress = wifiInfo.getMacAddress();
-    p.resolve(macAddress);
+    if (wifiInfo != null) {
+      String macAddress = wifiInfo.getMacAddress();
+      p.resolve(macAddress);
+    } else {
+      p.resolve(null);
+    }
   }
 
   @Override
